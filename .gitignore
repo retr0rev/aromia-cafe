@@ -8,3 +8,6 @@ uploads/
 *.db-journal
 *.db-wal
 *.db-shm
+*.psd
+*.ai
+*.eps
