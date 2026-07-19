@@ -1,15 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-// JWT_SECRET is validated at startup in index.ts — this will always be defined
-const JWT_SECRET = process.env.JWT_SECRET!;
+import { JWT_SECRET } from '../config';
 
 export interface JwtPayload {
   id: number;
   username: string;
 }
 
-// Extend Express Request to include admin info
 declare global {
   namespace Express {
     interface Request {
@@ -30,7 +27,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET, {
-      algorithms: ['HS256'], // Explicit algorithm — prevents alg confusion attacks
+      algorithms: ['HS256'],
     }) as JwtPayload;
     req.admin = decoded;
     next();
@@ -40,5 +37,4 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 }
 
 export { authMiddleware as requireAuth };
-
 export { JWT_SECRET };

@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { label: 'المنتجات', to: '/admin/items' },
   { label: 'الأكثر شهرة', to: '/admin/popular' },
   { label: 'الإعدادات', to: '/admin/settings' },
+  { label: 'الحساب', to: '/admin/account' },
 ] as const
 
 function AdminLayout() {
@@ -153,6 +154,18 @@ function AdminLayout() {
               {item.label}
             </Link>
           ))}
+          <Link
+            to="/admin/logout"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-2 w-full px-4 py-3 rounded-lg text-start min-h-[44px] transition-colors duration-150 text-sm font-medium text-red-500 hover:bg-red-50"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            تسجيل خروج
+          </Link>
         </nav>
 
         {/* Sidebar footer */}
@@ -178,22 +191,34 @@ function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main area */}
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Top bar */}
-        <header className="flex items-center h-16 shrink-0 px-4 lg:px-6 border-b border-gray-100 bg-white">
-          <button
-            className="lg:hidden p-3 -ms-3 text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="فتح القائمة"
-          >
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 5h16M3 11h16M3 17h16" />
-            </svg>
-          </button>
+        {/* Main area */}
+        <div className="flex flex-1 flex-col min-w-0">
+          {/* Top bar */}
+          <header className="flex items-center h-16 shrink-0 px-4 lg:px-6 border-b border-gray-100 bg-white">
+            <button
+              className="lg:hidden p-3 -ms-3 text-gray-700 hover:text-gray-900 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="فتح القائمة"
+            >
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 5h16M3 11h16M3 17h16" />
+              </svg>
+            </button>
 
-          <div className="flex-1" />
-        </header>
+            <div className="flex-1" />
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              تسجيل خروج
+            </button>
+          </header>
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-gray-50">

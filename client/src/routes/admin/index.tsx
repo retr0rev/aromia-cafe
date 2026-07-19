@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useCallback } from 'react'
 
 const CARDS = [
   { to: '/admin/categories', label: 'الأصناف', desc: 'إدارة أصناف المنيو', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
@@ -8,9 +9,29 @@ const CARDS = [
 ]
 
 function AdminDashboard() {
+  const navigate = useNavigate()
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token')
+    navigate({ to: '/admin/login', replace: true })
+  }, [navigate])
+
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">لوحة التحكم</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">لوحة التحكم</h1>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-200"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          تسجيل خروج
+        </button>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {CARDS.map(card => (
           <Link
