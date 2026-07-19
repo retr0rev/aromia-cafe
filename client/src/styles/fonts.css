@@ -1,0 +1,37 @@
+/* Frutiger LT Arabic - Arabic typeface */
+@font-face {
+  font-family: 'Frutiger LT Arabic';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/FrutigerLTArabic45Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Frutiger LT Arabic';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/FrutigerLTArabic55Roman.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Frutiger LT Arabic';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/FrutigerLTArabic65Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Frutiger LT Arabic';
+  font-style: normal;
+  font-weight: 900;
+  src: url('/fonts/FrutigerLTArabic75Black.ttf') format('truetype');
+}
+
+/* Caliburn - English headings typeface */
+@font-face {
+  font-family: 'Caliburn';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/Caliburn-Bold.otf') format('opentype'),
+       url('/fonts/Caliburn-Bold.woff2') format('woff2');
+}

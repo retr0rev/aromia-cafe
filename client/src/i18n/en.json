@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "about": "About"
+  },
+  "hero": {
+    "title": "Welcome to Aromia",
+    "subtitle": "Specialty coffee crafted with love, fresh bites every day",
+    "cta": "Browse the Menu",
+    "scrollDown": "Scroll down"
+  },
+  "popular": {
+    "title": "Most Popular",
+    "empty": "No popular items yet"
+  },
+  "menu": {
+    "title": "Menu",
+    "empty": "Menu is empty",
+    "categories": {
+      "coffee": "Coffee",
+      "hot_drinks": "Hot Drinks",
+      "cold_drinks": "Cold Drinks",
+      "pastries": "Pastries",
+      "desserts": "Desserts",
+      "sandwiches": "Sandwiches",
+      "breakfast": "Breakfast"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "address": "King Fahd Road, Riyadh",
+    "phone": "Phone: 011-234-5678",
+    "hours": "Open Daily: 6 AM - 12 AM",
+    "social": "Follow Us"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "items": "Menu Items",
+    "popular": "Popular Items",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "login": "Log In",
+    "form": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "add": "Add",
+      "edit": "Edit"
+    },
+    "success": {
+      "saved": "Saved successfully",
+      "created": "Created successfully",
+      "deleted": "Deleted successfully"
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again.",
+      "auth": "Login failed"
+    }
+  },
+  "loading": {
+    "default": "Loading...",
+    "menu": "Loading menu...",
+    "items": "Loading items..."
+  },
+  "error": {
+    "notFound": "Page not found",
+    "notFoundTitle": "Lost your way?",
+    "notFoundDescription": "The page you're looking for doesn't exist or has been moved. Let's get you back to fresh coffee.",
+    "server": "Server error",
+    "network": "Check your internet connection",
+    "retry": "Try Again",
+    "goHome": "Go Home"
+  },
+  "lang": {
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "footer": {
+    "contactHeading": "Contact Us",
+    "copyright": "Aromia \u00a9 {{year}}",
+    "rights": "All rights reserved"
+  }
+}
