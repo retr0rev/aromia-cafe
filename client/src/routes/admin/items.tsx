@@ -80,11 +80,11 @@ async function fetchItems(categoryId?: number): Promise<Item[]> {
   return res.json()
 }
 
-async function createItem(formData: FormData): Promise<Item> {
+async function createItem(data: Record<string, unknown>): Promise<Item> {
   const res = await fetch('/api/items', {
     method: 'POST',
-    headers: authHeaders(),
-    body: formData,
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
   })
   if (!res.ok) {
     handleAuthError(res)
@@ -94,11 +94,11 @@ async function createItem(formData: FormData): Promise<Item> {
   return res.json()
 }
 
-async function updateItem(id: number, formData: FormData): Promise<Item> {
+async function updateItem(id: number, data: Record<string, unknown>): Promise<Item> {
   const res = await fetch(`/api/items/${id}`, {
     method: 'PUT',
-    headers: authHeaders(),
-    body: formData,
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
   })
   if (!res.ok) {
     handleAuthError(res)
@@ -159,14 +159,12 @@ const CloseIcon = () => (
 
 // ── Image upload drop zone ────────────────────────────────────────────
 function ImageUpload({
-  imageFile: _imageFile,
   imagePreview,
   currentImagePath,
   onFileSelect,
   onClear,
   error,
 }: {
-  imageFile: File | null
   imagePreview: string | null
   currentImagePath: string | null
   onFileSelect: (file: File) => void
@@ -367,7 +365,7 @@ function ItemsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [form, setForm] = useState<ItemFormData>(EMPTY_FORM)
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageBase64, setImageBase64] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
@@ -408,8 +406,8 @@ function ItemsPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, formData }: { id: number; formData: FormData }) =>
-      updateItem(id, formData),
+    mutationFn: ({ id, data }: { id: number; data: Record<string, unknown> }) =>
+      updateItem(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] })
       closeModal()
@@ -433,7 +431,7 @@ function ItemsPage() {
 
   function resetForm() {
     setForm(EMPTY_FORM)
-    setImageFile(null)
+    setImageBase64(null)
     setImagePreview(null)
     setImageError(null)
     setFormError(null)
@@ -457,7 +455,7 @@ function ItemsPage() {
       price: String(item.price),
       sort_order: String(item.sort_order),
     })
-    setImageFile(null)
+    setImageBase64(null)
     setImagePreview(null)
     setImageError(null)
     setFormError(null)
@@ -484,21 +482,21 @@ function ItemsPage() {
     }
 
     setImageError(null)
-    setImageFile(file)
 
-    // Generate preview
+    // Convert to base64
     const reader = new FileReader()
     reader.onloadend = () => {
-      setImagePreview(reader.result as string)
+      const base64 = reader.result as string
+      setImageBase64(base64)
+      setImagePreview(base64)
     }
     reader.readAsDataURL(file)
   }
 
   function handleImageClear() {
-    setImageFile(null)
+    setImageBase64(null)
     setImagePreview(null)
     setImageError(null)
-    // Reset the file input
   }
 
   function handleFormChange(
@@ -531,34 +529,35 @@ function ItemsPage() {
       return
     }
     // Image required for new items
-    if (!editingItem && !imageFile) {
+    if (!editingItem && !imageBase64) {
       setFormError('يرجى رفع صورة للمنتج')
       return
     }
 
     setSubmitting(true)
 
-    const formData = new FormData()
-    formData.append('category_id', form.category_id)
-    formData.append('name_ar', form.name_ar.trim())
-    formData.append('name_en', form.name_en.trim())
-    formData.append('ingredients_ar', form.ingredients_ar)
-    formData.append('ingredients_en', form.ingredients_en)
-    formData.append('price', form.price)
-    formData.append('sort_order', form.sort_order || '0')
+    const data: Record<string, unknown> = {
+      category_id: Number(form.category_id),
+      name_ar: form.name_ar.trim(),
+      name_en: form.name_en.trim(),
+      ingredients_ar: form.ingredients_ar,
+      ingredients_en: form.ingredients_en,
+      price: Number(form.price),
+      sort_order: Number(form.sort_order || '0'),
+    }
 
-    if (imageFile) {
-      formData.append('image', imageFile)
+    if (imageBase64) {
+      data.image_path = imageBase64
     }
 
     try {
       if (editingItem) {
         await updateMutation.mutateAsync({
           id: editingItem.id,
-          formData,
+          data,
         })
       } else {
-        await createMutation.mutateAsync(formData)
+        await createMutation.mutateAsync(data)
       }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'حدث خطأ غير متوقع')
@@ -924,7 +923,6 @@ function ItemsPage() {
 
           {/* Image upload */}
           <ImageUpload
-            imageFile={imageFile}
             imagePreview={imagePreview}
             currentImagePath={editingItem?.image_path ?? null}
             onFileSelect={handleImageSelect}
