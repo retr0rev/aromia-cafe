@@ -4,9 +4,14 @@
   "buildCommand": "cd client && npx vite build",
   "outputDirectory": "client/dist",
   "installCommand": "npm install && cd client && npm install",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "api/**"
+    }
+  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/uploads/(.*)", "destination": "/api" },
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/uploads/(.*)", "destination": "/api/index.ts" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

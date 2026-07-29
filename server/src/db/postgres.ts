@@ -3,6 +3,7 @@ import { Pool, QueryResult } from 'pg'
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
+  family: 4,
 })
 
 export async function query(text: string, params: unknown[] = []): Promise<unknown[]> {
