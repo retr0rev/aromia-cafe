@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express'
 import cors from 'cors'
-import path from 'path'
 import { initDatabase } from '../server/src/db/postgres'
 
 // Import routes
@@ -22,16 +21,16 @@ app.use(express.json({ limit: '1mb' }))
 app.use(express.urlencoded({ extended: true, limit: '1mb' }))
 
 // Health check
-app.get('/api/health', (_req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok' })
 })
 
-// Routes
-app.use('/api/auth', authRoutes)
-app.use('/api/categories', categoryRoutes)
-app.use('/api/items', itemRoutes)
-app.use('/api/popular', popularRoutes)
-app.use('/api/settings', settingsRoutes)
+// Routes - no /api prefix since Vercel strips it
+app.use('/auth', authRoutes)
+app.use('/categories', categoryRoutes)
+app.use('/items', itemRoutes)
+app.use('/popular', popularRoutes)
+app.use('/settings', settingsRoutes)
 
 // Error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
