@@ -49,12 +49,22 @@ let ready = false
 
 module.exports = async function handler(req, res) {
   try {
-    if (!ready) { await init(); ready = true }
-
     const m = req.method
     const u = (req.url || '').split('?')[0]
 
+    // DEBUG - no DB needed
+    if (u === '/api/debug') {
+      return res.json({
+        DATABASE_URL_set: !!process.env.DATABASE_URL,
+        DATABASE_URL_prefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 40) : 'NOT SET',
+        JWT_SECRET_set: !!process.env.JWT_SECRET,
+        all_env_keys: Object.keys(process.env).filter(k => !k.startsWith('_') && !k.startsWith('npm')).sort(),
+      })
+    }
+
     if (u === '/api/health') return res.json({ status: 'ok' })
+
+    if (!ready) { await init(); ready = true }
 
     if (u === '/api/auth/login' && m === 'POST') {
       const { username, password } = req.body || {}
