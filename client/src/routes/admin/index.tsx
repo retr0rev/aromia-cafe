@@ -1,5 +1,31 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+function useRequireAuth() {
+  const navigate = useNavigate()
+  const [authed, setAuthed] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate({ to: '/admin/login', replace: true })
+      return
+    }
+    fetch('/api/auth/verify', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('unauthorized')
+        setAuthed(true)
+      })
+      .catch(() => {
+        localStorage.removeItem('token')
+        navigate({ to: '/admin/login', replace: true })
+      })
+  }, [navigate])
+
+  return authed
+}
 
 const CARDS = [
   { to: '/admin/categories', label: 'الأصناف', desc: 'إدارة أصناف المنيو', icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
@@ -10,11 +36,14 @@ const CARDS = [
 
 function AdminDashboard() {
   const navigate = useNavigate()
+  const authed = useRequireAuth()
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('token')
     navigate({ to: '/admin/login', replace: true })
   }, [navigate])
+
+  if (!authed) return null
 
   return (
     <div className="p-6">
