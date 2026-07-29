@@ -28,42 +28,42 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminPopularRoute = AdminPopularRouteImport.update({
   id: '/admin/popular',
   path: '/admin/popular',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLogoutRoute = AdminLogoutRouteImport.update({
   id: '/admin/logout',
   path: '/admin/logout',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminItemsRoute = AdminItemsRouteImport.update({
   id: '/admin/items',
   path: '/admin/items',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/admin/categories',
   path: '/admin/categories',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAccountRoute = AdminAccountRouteImport.update({
   id: '/admin/account',
   path: '/admin/account',
-  getParentRoute: () => Admin_layoutRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Admin_layoutRoute = Admin_layoutRouteImport.update({
   id: '/admin/__layout',
@@ -148,6 +148,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   Admin_layoutRoute: typeof Admin_layoutRoute
+  AdminAccountRoute: typeof AdminAccountRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminItemsRoute: typeof AdminItemsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminLogoutRoute: typeof AdminLogoutRoute
+  AdminPopularRoute: typeof AdminPopularRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -159,6 +167,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/popular': {
+      id: '/admin/popular'
+      path: '/admin/popular'
+      fullPath: '/admin/popular'
+      preLoaderRoute: typeof AdminPopularRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/logout': {
+      id: '/admin/logout'
+      path: '/admin/logout'
+      fullPath: '/admin/logout'
+      preLoaderRoute: typeof AdminLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/items': {
+      id: '/admin/items'
+      path: '/admin/items'
+      fullPath: '/admin/items'
+      preLoaderRoute: typeof AdminItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/admin/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/account': {
+      id: '/admin/account'
+      path: '/admin/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AdminAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/__layout': {
       id: '/admin/__layout'
       path: '/admin'
@@ -166,66 +230,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Admin_layoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/popular': {
-      id: '/admin/popular'
-      path: '/popular'
-      fullPath: '/admin/popular'
-      preLoaderRoute: typeof AdminPopularRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/logout': {
-      id: '/admin/logout'
-      path: '/logout'
-      fullPath: '/admin/logout'
-      preLoaderRoute: typeof AdminLogoutRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/items': {
-      id: '/admin/items'
-      path: '/items'
-      fullPath: '/admin/items'
-      preLoaderRoute: typeof AdminItemsRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/categories': {
-      id: '/admin/categories'
-      path: '/categories'
-      fullPath: '/admin/categories'
-      preLoaderRoute: typeof AdminCategoriesRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
-    '/admin/account': {
-      id: '/admin/account'
-      path: '/account'
-      fullPath: '/admin/account'
-      preLoaderRoute: typeof AdminAccountRouteImport
-      parentRoute: typeof Admin_layoutRouteImport
-    }
   }
 }
 
-const Admin_layoutRouteChildren = {
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  Admin_layoutRoute: Admin_layoutRoute,
   AdminAccountRoute: AdminAccountRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminItemsRoute: AdminItemsRoute,
@@ -234,15 +244,6 @@ const Admin_layoutRouteChildren = {
   AdminPopularRoute: AdminPopularRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
-}
-
-const Admin_layoutRouteWithChildren = Admin_layoutRoute._addFileChildren(
-  Admin_layoutRouteChildren,
-)
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  Admin_layoutRoute: Admin_layoutRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
