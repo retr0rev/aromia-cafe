@@ -3,14 +3,16 @@ import bcrypt from 'bcryptjs'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 10000,
 })
 
 async function seed() {
+  console.log('Connecting to database...')
   const client = await pool.connect()
 
   try {
-    // Create tables
+    console.log('Creating tables...')
     await client.query(`
       CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
@@ -48,19 +50,22 @@ async function seed() {
         value TEXT NOT NULL
       );
     `)
+    console.log('Tables created.')
 
-    // Create admin user if not exists
     const adminUsername = process.env.ADMIN_USERNAME || 'admin'
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
 
+    console.log(`Creating admin user: ${adminUsername}...`)
     const existingAdmin = await client.query('SELECT id FROM admin WHERE username = $1', [adminUsername])
     if (existingAdmin.rows.length === 0) {
       const hash = bcrypt.hashSync(adminPassword, 10)
       await client.query('INSERT INTO admin (username, password_hash) VALUES ($1, $2)', [adminUsername, hash])
-      console.log(`Admin user created: ${adminUsername}`)
+      console.log('Admin user created.')
+    } else {
+      console.log('Admin user already exists.')
     }
 
-    // Insert default settings if not exist
+    console.log('Inserting default settings...')
     const defaultSettings = {
       about_ar: '',
       about_en: '',
@@ -74,21 +79,22 @@ async function seed() {
     }
 
     for (const [key, value] of Object.entries(defaultSettings)) {
-      const existing = await client.query('SELECT key FROM settings WHERE key = $1', [key])
-      if (existing.rows.length === 0) {
-        await client.query('INSERT INTO settings (key, value) VALUES ($1, $2)', [key, value])
-      }
+      await client.query(
+        'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+        [key, value]
+      )
     }
 
-    console.log('Database seeded successfully')
+    console.log('Database seeded successfully!')
   } finally {
     client.release()
+    await pool.end()
   }
 }
 
 seed()
   .then(() => process.exit(0))
   .catch((err) => {
-    console.error('Seed failed:', err)
+    console.error('Seed failed:', err.message)
     process.exit(1)
   })

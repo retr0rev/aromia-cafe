@@ -2,27 +2,23 @@ import { Pool, QueryResult } from 'pg'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: { rejectUnauthorized: false },
 })
 
-// Execute a query and return rows
 export async function query(text: string, params: unknown[] = []): Promise<unknown[]> {
   const result: QueryResult = await pool.query(text, params)
   return result.rows
 }
 
-// Execute a query and return the first row
 export async function queryOne(text: string, params: unknown[] = []): Promise<unknown | null> {
   const rows = await query(text, params)
   return rows[0] ?? null
 }
 
-// Execute an insert/update/delete and return the result
 export async function execute(text: string, params: unknown[] = []): Promise<QueryResult> {
   return pool.query(text, params)
 }
 
-// Initialize the database schema
 export async function initDatabase(): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS categories (
