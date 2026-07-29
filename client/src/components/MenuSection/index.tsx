@@ -1,9 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { animate } from 'animejs'
 import sagePattern from '@/assets/brand/patterns/sage-green/Pattern - Aromia.png'
 
-// ── Types ───────────────────────────────────────────────────────────────
 interface Category {
   id: number
   name_ar: string
@@ -22,13 +22,11 @@ interface Item {
   image_path: string | null
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────
 function formatPrice(price: number, isArabic: boolean): string {
   const formatted = price.toLocaleString()
   return isArabic ? `${formatted} ل.س` : `${formatted} S.P`
 }
 
-// ── Skeleton ────────────────────────────────────────────────────────────
 function SkeletonMenu() {
   return (
     <section className="py-16 md:py-24">
@@ -58,7 +56,69 @@ function SkeletonMenu() {
   )
 }
 
-// ── Main component ───────────────────────────────────────────────────────
+function MenuItemRow({ item, isArabic, isLast }: { item: Item; isArabic: boolean; isLast: boolean }) {
+  const rowRef = useRef<HTMLDivElement>(null)
+  const name = isArabic ? item.name_ar : item.name_en
+  const desc = isArabic ? item.ingredients_ar : item.ingredients_en
+
+  useEffect(() => {
+    if (!rowRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          animate(rowRef.current!, {
+            opacity: [0, 1],
+            translateX: isArabic ? [20, 0] : [-20, 0],
+            duration: 500,
+            ease: 'easeOutQuad',
+          })
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(rowRef.current)
+    return () => observer.disconnect()
+  }, [isArabic])
+
+  return (
+    <div ref={rowRef} style={{ opacity: 0 }}>
+      <div className="group relative flex items-start gap-4 py-5 px-4 -mx-4 rounded-xl transition-all duration-300 hover:bg-white/60 hover:shadow-sm">
+        {item.image_path && (
+          <div className="relative shrink-0">
+            <img
+              src={item.image_path}
+              alt={name}
+              className="w-14 h-14 rounded-xl object-cover ring-1 ring-sage-100/80 shadow-sm"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/[0.03]" />
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3">
+            <h4 className="text-[15px] font-semibold text-gray-900 group-hover:text-sage-700 transition-colors tracking-tight">
+              {name}
+            </h4>
+            <span className="flex-1 border-b border-dotted border-sage-200/40 translate-y-[-2px] min-w-[20px]" />
+            <span className="text-[15px] font-bold text-sage-600 whitespace-nowrap tracking-tight tabular-nums">
+              {formatPrice(item.price, isArabic)}
+            </span>
+          </div>
+          {desc && (
+            <p className="mt-1 text-[13px] text-gray-400 leading-relaxed line-clamp-2">
+              {desc}
+            </p>
+          )}
+        </div>
+      </div>
+      {!isLast && (
+        <div className="border-b border-sage-100/30 mx-4" />
+      )}
+    </div>
+  )
+}
 
 export function MenuSection() {
   const { t, i18n } = useTranslation()
@@ -153,7 +213,7 @@ export function MenuSection() {
               void queryClient.invalidateQueries({ queryKey: ['categories'] })
               void queryClient.invalidateQueries({ queryKey: ['items'] })
             }}
-            className="rounded-lg bg-sage-500 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sage-600"
+            className="rounded-xl bg-sage-500 px-6 py-3 text-sm font-medium text-white transition-all hover:bg-sage-600 hover:shadow-lg hover:shadow-sage-500/20 active:scale-95"
           >
             {t('error.retry')}
           </button>
@@ -166,7 +226,7 @@ export function MenuSection() {
     return (
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-2xl px-6 text-center">
-          <h2 className="text-3xl font-bold text-sage-800 md:text-4xl">{t('menu.title')}</h2>
+          <h2 className="text-3xl font-bold text-sage-800 md:text-4xl tracking-tight">{t('menu.title')}</h2>
           <p className="mt-6 text-lg text-gray-500">{t('menu.empty')}</p>
         </div>
       </section>
@@ -176,22 +236,27 @@ export function MenuSection() {
   return (
     <section className="relative py-16 md:py-24">
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.025]"
+        className="pointer-events-none absolute inset-0 opacity-[0.02]"
         style={{ backgroundImage: `url(${sagePattern})`, backgroundSize: '300px' }}
         aria-hidden="true"
       />
 
       <div className="relative mx-auto max-w-2xl px-6">
-        <h2 className="mb-10 text-center text-3xl font-bold text-sage-800 md:text-4xl">
-          {t('menu.title')}
-        </h2>
+        <div className="text-center mb-12">
+          <span className="inline-block text-[11px] font-medium tracking-[0.2em] uppercase text-sage-500/70 mb-3">
+            {isArabic ? 'اكتشف' : 'Discover'}
+          </span>
+          <h2 className="text-3xl font-bold text-sage-800 md:text-4xl tracking-tight">
+            {t('menu.title')}
+          </h2>
+          <div className="mt-4 mx-auto w-12 h-0.5 bg-gradient-to-r from-transparent via-sage-400 to-transparent" />
+        </div>
 
-        {/* Sticky category tabs */}
         <nav
-          className="sticky top-0 z-30 -mx-6 mb-12 overflow-x-auto px-6 py-3 backdrop-blur-sm"
+          className="sticky top-0 z-30 -mx-6 mb-14 overflow-x-auto px-6 py-3 backdrop-blur-md"
           style={{
             WebkitOverflowScrolling: 'touch',
-            backgroundColor: 'color-mix(in srgb, var(--color-sage-100) 20%, white)',
+            backgroundColor: 'color-mix(in srgb, var(--color-sage-100) 30%, white)',
           }}
           role="tablist"
           aria-label={isArabic ? 'تصنيفات القائمة' : 'Menu categories'}
@@ -206,10 +271,10 @@ export function MenuSection() {
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => scrollToCategory(cat.id)}
-                  className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-200 min-h-[40px] ${
+                  className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 min-h-[40px] ${
                     isActive
-                      ? 'bg-sage-500 text-white shadow-md shadow-sage-500/20'
-                      : 'bg-white/80 text-sage-700 ring-1 ring-sage-200 hover:bg-sage-50 hover:ring-sage-300'
+                      ? 'bg-sage-500 text-white shadow-md shadow-sage-500/25 scale-[1.02]'
+                      : 'bg-white/70 text-sage-700 ring-1 ring-sage-200/60 hover:bg-sage-50 hover:ring-sage-300 hover:scale-[1.01]'
                   }`}
                 >
                   {isArabic ? cat.name_ar : cat.name_en}
@@ -219,7 +284,6 @@ export function MenuSection() {
           </div>
         </nav>
 
-        {/* Category sections */}
         {categories!.map((cat) => {
           const catItems = groupedItems.get(cat.id) ?? []
           return (
@@ -227,14 +291,13 @@ export function MenuSection() {
               key={cat.id}
               id={`category-${cat.id}`}
               data-category-id={cat.id}
-              className="mb-14 scroll-mt-28"
+              className="mb-16 scroll-mt-28"
             >
-              {/* Category header with decorative line */}
               <div className="mb-6 flex items-center gap-4">
-                <h3 className="shrink-0 text-xl font-bold text-sage-700 tracking-wide">
+                <h3 className="shrink-0 text-lg font-bold text-sage-700 tracking-wide">
                   {isArabic ? cat.name_ar : cat.name_en}
                 </h3>
-                <div className="flex-1 border-b border-sage-200/60" />
+                <div className="flex-1 h-px bg-gradient-to-l from-sage-200/60 to-transparent" />
               </div>
 
               {catItems.length === 0 ? (
@@ -242,51 +305,15 @@ export function MenuSection() {
                   {isArabic ? 'لا توجد منتجات في هذا القسم' : 'No items in this category'}
                 </p>
               ) : (
-                <div className="space-y-1">
-                  {catItems.map((item, idx) => {
-                    const name = isArabic ? item.name_ar : item.name_en
-                    const desc = isArabic ? item.ingredients_ar : item.ingredients_en
-
-                    return (
-                      <div key={item.id}>
-                        {/* Item row */}
-                        <div className="group flex items-start gap-3 py-3.5">
-                          {/* Image (small, optional) */}
-                          {item.image_path && (
-                            <img
-                              src={item.image_path}
-                              alt={name}
-                              className="w-10 h-10 rounded-lg object-cover shrink-0 ring-1 ring-sage-100"
-                              loading="lazy"
-                            />
-                          )}
-
-                          {/* Name + description + price */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-baseline gap-2">
-                              <h4 className="text-base font-semibold text-gray-900 group-hover:text-sage-700 transition-colors">
-                                {name}
-                              </h4>
-                              <span className="flex-1 border-b border-dotted border-sage-200/50 translate-y-[-4px]" />
-                              <span className="text-base font-bold text-sage-600 whitespace-nowrap">
-                                {formatPrice(item.price, isArabic)}
-                              </span>
-                            </div>
-                            {desc && (
-                              <p className="mt-0.5 text-sm text-gray-400 leading-relaxed line-clamp-2">
-                                {desc}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Subtle separator between items (not after last) */}
-                        {idx < catItems.length - 1 && (
-                          <div className="border-b border-sage-100/40" />
-                        )}
-                      </div>
-                    )
-                  })}
+                <div>
+                  {catItems.map((item, idx) => (
+                    <MenuItemRow
+                      key={item.id}
+                      item={item}
+                      isArabic={isArabic}
+                      isLast={idx === catItems.length - 1}
+                    />
+                  ))}
                 </div>
               )}
             </section>

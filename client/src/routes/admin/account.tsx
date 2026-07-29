@@ -5,6 +5,13 @@ function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
+function handleAuthError(res: Response): void {
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/admin/login'
+  }
+}
+
 async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken()
   const headers: Record<string, string> = {
@@ -12,7 +19,9 @@ async function apiFetch(url: string, options: RequestInit = {}): Promise<Respons
     ...(options.headers as Record<string, string>),
   }
   if (token) headers['Authorization'] = `Bearer ${token}`
-  return fetch(url, { ...options, headers })
+  const res = await fetch(url, { ...options, headers })
+  handleAuthError(res)
+  return res
 }
 
 function AccountPage() {

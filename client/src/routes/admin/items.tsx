@@ -58,6 +58,13 @@ function authHeaders(): Record<string, string> {
   return headers
 }
 
+function handleAuthError(res: Response): void {
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/admin/login'
+  }
+}
+
 async function fetchCategories(): Promise<Category[]> {
   const res = await fetch('/api/categories')
   if (!res.ok) throw new Error('Failed to fetch categories')
@@ -80,6 +87,7 @@ async function createItem(formData: FormData): Promise<Item> {
     body: formData,
   })
   if (!res.ok) {
+    handleAuthError(res)
     const err = await res.json().catch(() => ({ error: 'فشل إنشاء المنتج' }))
     throw new Error(err.error)
   }
@@ -93,6 +101,7 @@ async function updateItem(id: number, formData: FormData): Promise<Item> {
     body: formData,
   })
   if (!res.ok) {
+    handleAuthError(res)
     const err = await res.json().catch(() => ({ error: 'فشل تحديث المنتج' }))
     throw new Error(err.error)
   }
@@ -105,6 +114,7 @@ async function deleteItem(id: number): Promise<void> {
     headers: authHeaders(),
   })
   if (!res.ok) {
+    handleAuthError(res)
     const err = await res.json().catch(() => ({ error: 'فشل حذف المنتج' }))
     throw new Error(err.error)
   }

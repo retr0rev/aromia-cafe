@@ -10,6 +10,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 // --- API ---
 
+function handleAuthError(res: Response): void {
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/admin/login'
+  }
+}
+
 async function fetchSettings(): Promise<Record<string, string>> {
   const res = await fetch('/api/settings')
   if (!res.ok) throw new Error('Failed to load settings')
@@ -30,7 +37,10 @@ async function putSettings(
     headers,
     body: JSON.stringify(data),
   })
-  if (!res.ok) throw new Error('Failed to save settings')
+  if (!res.ok) {
+    handleAuthError(res)
+    throw new Error('Failed to save settings')
+  }
   return res.json()
 }
 
@@ -191,6 +201,127 @@ function SettingsForm() {
   )
 }
 
+// --- Password change component ---
+
+function PasswordChangeForm() {
+  const [form, setForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
+  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMsg(null)
+
+    if (form.newPassword !== form.confirmPassword) {
+      setMsg({ type: 'error', text: 'كلمة المرور الجديدة غير متطابقة' })
+      return
+    }
+    if (form.newPassword.length < 8) {
+      setMsg({ type: 'error', text: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل' })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/auth/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          currentPassword: form.currentPassword,
+          newPassword: form.newPassword,
+        }),
+      })
+      handleAuthError(res)
+      const data = await res.json()
+
+      if (!res.ok) {
+        setMsg({ type: 'error', text: data.error || 'حدث خطأ' })
+        return
+      }
+
+      setMsg({ type: 'success', text: data.message || 'تم تغيير كلمة المرور بنجاح' })
+      setForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    } catch {
+      setMsg({ type: 'error', text: 'حدث خطأ في الاتصال' })
+    } finally {
+      setLoading(false)
+    }
+  }, [form])
+
+  const inputCls = [
+    'w-full px-4 py-2.5 rounded-lg border border-gray-200',
+    'focus:border-sage-500 focus:ring-2 focus:ring-sage-500/20',
+    'outline-none transition-colors',
+    'placeholder:text-gray-400',
+  ].join(' ')
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 className="text-lg font-bold text-gray-900 mb-4">تغيير كلمة المرور</h2>
+
+      {msg && (
+        <div className={`mb-4 px-4 py-3 rounded-lg text-sm font-medium ${
+          msg.type === 'success'
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-red-50 text-red-600 border border-red-200'
+        }`}>
+          {msg.text}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور الحالية</label>
+          <input
+            type="password"
+            value={form.currentPassword}
+            onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
+            className={inputCls}
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">كلمة المرور الجديدة</label>
+          <input
+            type="password"
+            value={form.newPassword}
+            onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+            className={inputCls}
+            required
+            minLength={8}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">تأكيد كلمة المرور الجديدة</label>
+          <input
+            type="password"
+            value={form.confirmPassword}
+            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+            className={inputCls}
+            required
+            minLength={8}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-6 py-2.5 bg-sage-500 text-white rounded-lg hover:bg-sage-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        >
+          {loading ? 'جاري الحفظ...' : 'تغيير كلمة المرور'}
+        </button>
+      </form>
+    </div>
+  )
+}
+
 // --- Route component ---
 
 function SettingsPage() {
@@ -198,7 +329,10 @@ function SettingsPage() {
     <QueryClientProvider client={queryClient}>
       <div className="p-6 flex flex-col items-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 w-full max-w-2xl">الإعدادات</h1>
-        <SettingsForm />
+        <div className="w-full max-w-2xl space-y-6">
+          <SettingsForm />
+          <PasswordChangeForm />
+        </div>
       </div>
     </QueryClientProvider>
   )

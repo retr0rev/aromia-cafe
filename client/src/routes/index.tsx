@@ -17,14 +17,17 @@ async function fetchPopular(): Promise<PopularItem[]> {
 
 function SectionDivider() {
   return (
-    <div
-      className="h-6 bg-repeat-x opacity-[0.08] sm:h-8"
-      style={{
-        backgroundImage: `url(${sagePattern})`,
-        backgroundSize: 'auto 100%',
-      }}
-      aria-hidden="true"
-    />
+    <div className="relative py-1">
+      <div
+        className="h-8 bg-repeat-x opacity-[0.06] sm:h-10"
+        style={{
+          backgroundImage: `url(${sagePattern})`,
+          backgroundSize: 'auto 100%',
+        }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-transparent" />
+    </div>
   )
 }
 
@@ -39,27 +42,33 @@ function LandingPage() {
   return (
     <main>
       <Hero3D />
-      <SectionDivider />
 
-      <ScrollReveal variant="slide-up" threshold={0.05}>
-        <PopularItems
-          items={popularQuery.data}
-          isLoading={popularQuery.isLoading}
-          isError={popularQuery.isError}
-          onRetry={() => {
-            void queryClient.invalidateQueries({ queryKey: ['popular'] })
-          }}
-        />
-      </ScrollReveal>
+      <div className="relative bg-gradient-to-b from-sage-50/50 to-white">
+        <SectionDivider />
 
-      <SectionDivider />
-      <ScrollReveal variant="slide-up" threshold={0.05}>
-        <MenuSection />
-      </ScrollReveal>
-      <SectionDivider />
-      <ScrollReveal variant="slide-up" threshold={0.05}>
-        <AboutFooter />
-      </ScrollReveal>
+        <ScrollReveal variant="slide-up" threshold={0.05} duration={700}>
+          <PopularItems
+            items={popularQuery.data}
+            isLoading={popularQuery.isLoading}
+            isError={popularQuery.isError}
+            onRetry={() => {
+              void queryClient.invalidateQueries({ queryKey: ['popular'] })
+            }}
+          />
+        </ScrollReveal>
+
+        <SectionDivider />
+
+        <ScrollReveal variant="fade-in" threshold={0.03} duration={800}>
+          <MenuSection />
+        </ScrollReveal>
+
+        <SectionDivider />
+
+        <ScrollReveal variant="slide-up" threshold={0.05} duration={700}>
+          <AboutFooter />
+        </ScrollReveal>
+      </div>
     </main>
   )
 }

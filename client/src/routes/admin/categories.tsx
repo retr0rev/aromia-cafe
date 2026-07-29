@@ -31,6 +31,13 @@ function getToken(): string | null {
   return localStorage.getItem('token')
 }
 
+function handleAuthError(res: Response): void {
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/admin/login'
+  }
+}
+
 async function apiFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken()
   const headers = new Headers(options.headers)
@@ -38,7 +45,9 @@ async function apiFetch(url: string, options: RequestInit = {}): Promise<Respons
     headers.set('Content-Type', 'application/json')
   }
   if (token) headers.set('Authorization', `Bearer ${token}`)
-  return fetch(url, { ...options, headers })
+  const res = await fetch(url, { ...options, headers })
+  handleAuthError(res)
+  return res
 }
 
 async function fetchCategories(): Promise<Category[]> {

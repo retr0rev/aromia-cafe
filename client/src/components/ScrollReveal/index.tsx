@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { animate, type JSAnimation } from 'animejs'
 
-type AnimationVariant = 'fade-in' | 'slide-up' | 'slide-left' | 'slide-right'
+type AnimationVariant = 'fade-in' | 'slide-up' | 'slide-left' | 'slide-right' | 'scale-in' | 'blur-in'
 
 interface ScrollRevealProps {
   children: React.ReactNode
@@ -8,6 +9,9 @@ interface ScrollRevealProps {
   threshold?: number
   className?: string
   delay?: number
+  duration?: number
+  stagger?: number
+  easing?: string
 }
 
 function useReducedMotion(): boolean {
@@ -26,58 +30,79 @@ function useReducedMotion(): boolean {
   return reduced
 }
 
-const variantClasses: Record<AnimationVariant, { hidden: string; visible: string }> = {
+const variantParams: Record<AnimationVariant, Record<string, unknown>> = {
   'fade-in': {
-    hidden: 'opacity-0',
-    visible: 'opacity-100',
+    opacity: [0, 1],
   },
   'slide-up': {
-    hidden: 'opacity-0 translate-y-8',
-    visible: 'opacity-100 translate-y-0',
+    opacity: [0, 1],
+    translateY: [40, 0],
   },
   'slide-left': {
-    hidden: 'opacity-0 translate-x-8',
-    visible: 'opacity-100 translate-x-0',
+    opacity: [0, 1],
+    translateX: [40, 0],
   },
   'slide-right': {
-    hidden: 'opacity-0 -translate-x-8',
-    visible: 'opacity-100 translate-x-0',
+    opacity: [0, 1],
+    translateX: [-40, 0],
+  },
+  'scale-in': {
+    opacity: [0, 1],
+    scale: [0.9, 1],
+  },
+  'blur-in': {
+    opacity: [0, 1],
+    filter: ['blur(8px)', 'blur(0px)'],
   },
 }
 
-/**
- * ScrollReveal — Animates children into view using IntersectionObserver.
- *
- * Uses GPU-composited CSS transforms (opacity + translate) only.
- * Respects `prefers-reduced-motion: reduce` — shows content immediately.
- * Fires once (unobserves after first intersection).
- */
 export function ScrollReveal({
   children,
   variant = 'fade-in',
   threshold = 0.1,
   className = '',
   delay = 0,
+  duration = 800,
+  easing = 'easeOutQuad',
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
   const prefersReduced = useReducedMotion()
+  const animRef = useRef<JSAnimation | null>(null)
+  const hasAnimated = useRef(false)
 
-  const isVisible = prefersReduced || visible
+  const runAnimation = useCallback(() => {
+    if (!ref.current || hasAnimated.current) return
+    hasAnimated.current = true
+
+    const params = variantParams[variant]
+    animRef.current = animate(ref.current, {
+      ...params,
+      duration,
+      delay,
+      ease: easing as any,
+    })
+  }, [variant, duration, delay, easing])
 
   useEffect(() => {
     if (prefersReduced) {
-      setVisible(true)
+      if (ref.current) {
+        ref.current.style.opacity = '1'
+        ref.current.style.transform = 'none'
+        ref.current.style.filter = 'none'
+      }
       return
     }
 
     const el = ref.current
     if (!el) return
 
+    // Set initial hidden state
+    el.style.opacity = '0'
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisible(true)
+          runAnimation()
           observer.unobserve(el)
         }
       },
@@ -86,32 +111,10 @@ export function ScrollReveal({
 
     observer.observe(el)
     return () => observer.disconnect()
-  }, [prefersReduced, threshold])
-
-  const { hidden, visible: visibleClass } = variantClasses[variant]
-
-  const style = useMemo(
-    () =>
-      delay > 0
-        ? ({
-            transitionDelay: `${delay}ms`,
-            '--reveal-delay': `${delay}ms`,
-          } as React.CSSProperties)
-        : undefined,
-    [delay],
-  )
+  }, [prefersReduced, threshold, runAnimation])
 
   return (
-    <div
-      ref={ref}
-      className={`${className} ${isVisible ? visibleClass : hidden}`}
-      style={{
-        ...style,
-        transition:
-          'opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-        willChange: isVisible ? undefined : 'opacity, transform',
-      }}
-    >
+    <div ref={ref} className={className}>
       {children}
     </div>
   )

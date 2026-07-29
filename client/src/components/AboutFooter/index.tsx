@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
+import { animate } from 'animejs'
 
 const CURRENT_YEAR = new Date().getFullYear()
 
 import patternBg from '@/assets/brand/patterns/sage-green/Pattern - Aromia.png'
 import logoImg from '@/assets/brand/logos/sage-green/Logo - Aromia-03.png'
-
-// --- API ---
 
 const SETTINGS_KEY = ['settings'] as const
 
@@ -17,21 +16,9 @@ async function fetchSettings(): Promise<Record<string, string>> {
   return res.json()
 }
 
-// --- Icons (brand iconography style: clean line icons in Sage Green) ---
-
 function MapPinIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
@@ -40,17 +27,7 @@ function MapPinIcon() {
 
 function PhoneIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
     </svg>
   )
@@ -58,17 +35,7 @@ function PhoneIcon() {
 
 function ClockIcon() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
@@ -77,17 +44,7 @@ function ClockIcon() {
 
 function InstagramIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
       <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
       <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -97,23 +54,11 @@ function InstagramIcon() {
 
 function FacebookIcon() {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   )
 }
-
-// --- Contact item (with optional href) ---
 
 function ContactItem({
   icon,
@@ -125,9 +70,9 @@ function ContactItem({
   href?: string
 }) {
   const content = (
-    <div className="flex items-center gap-3 text-gray-700 min-h-[44px]">
-      <span className="shrink-0 text-sage-500">{icon}</span>
-      <span>{children}</span>
+    <div className="flex items-center gap-3 text-gray-700 min-h-[44px] group">
+      <span className="shrink-0 text-sage-500 group-hover:text-sage-600 transition-colors">{icon}</span>
+      <span className="group-hover:text-gray-900 transition-colors">{children}</span>
     </div>
   )
 
@@ -136,10 +81,8 @@ function ContactItem({
     return (
       <a
         href={href}
-        className="block group hover:text-sage-700 transition-colors"
-        {...(isExternal
-          ? { target: '_blank', rel: 'noopener noreferrer' }
-          : {})}
+        className="block hover:text-sage-700 transition-colors"
+        {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       >
         {content}
       </a>
@@ -148,8 +91,6 @@ function ContactItem({
 
   return <div>{content}</div>
 }
-
-// --- Skeleton loading state ---
 
 function AboutFooterSkeleton() {
   return (
@@ -185,8 +126,6 @@ function AboutFooterSkeleton() {
   )
 }
 
-// --- Error state (minimal footer) ---
-
 function AboutFooterError() {
   const { t } = useTranslation()
 
@@ -195,11 +134,7 @@ function AboutFooterError() {
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-sage-400 via-sage-500 to-sage-600" />
       <div className="relative border-t border-sage-200/60">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-center gap-3">
-          <img
-            src={logoImg}
-            alt="Aromia"
-            className="h-5 w-auto opacity-80"
-          />
+          <img src={logoImg} alt="Aromia" className="h-5 w-auto opacity-80" />
           <span className="text-xs text-gray-500">
             {t('footer.copyright', { year: CURRENT_YEAR })}
           </span>
@@ -209,29 +144,44 @@ function AboutFooterError() {
   )
 }
 
-// --- Main component ---
-
 export function AboutFooter() {
   const { i18n, t } = useTranslation()
   const isArabic = i18n.language === 'ar'
+  const sectionRef = useRef<HTMLElement>(null)
 
   const { data: settings, isLoading, isError } = useQuery({
     queryKey: SETTINGS_KEY,
     queryFn: fetchSettings,
   })
 
+  useEffect(() => {
+    if (!sectionRef.current || isLoading || isError) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          animate(sectionRef.current!.querySelectorAll('.footer-animate'), {
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 600,
+            delay: (_target?: any, i?: number) => (i ?? 0) * 100,
+            ease: 'easeOutQuad',
+          })
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(sectionRef.current)
+    return () => observer.disconnect()
+  }, [isLoading, isError])
+
   const aboutText = useMemo(() => {
     if (!settings) return ''
     return isArabic ? (settings.about_ar ?? '') : (settings.about_en ?? '')
   }, [settings, isArabic])
 
-  if (isError) {
-    return <AboutFooterError />
-  }
-
-  if (isLoading) {
-    return <AboutFooterSkeleton />
-  }
+  if (isError) return <AboutFooterError />
+  if (isLoading) return <AboutFooterSkeleton />
 
   const address = settings?.address ?? ''
   const phone = settings?.phone ?? ''
@@ -247,26 +197,23 @@ export function AboutFooter() {
     : ''
 
   return (
-    <footer className="relative bg-sage-50 overflow-hidden">
-      {/* Brand pattern background */}
+    <footer ref={sectionRef} className="relative bg-sage-50 overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.03] bg-repeat bg-[length:300px]"
         style={{ backgroundImage: `url(${patternBg})` }}
         aria-hidden="true"
       />
 
-      {/* Top gradient accent */}
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-sage-400 via-sage-500 to-sage-600" />
 
       <div className="relative max-w-7xl mx-auto px-6 pt-16 pb-8">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* About column */}
-          <div>
-            <h3 className="text-xl font-bold text-sage-700 mb-4">
+          <div className="footer-animate" style={{ opacity: 0 }}>
+            <h3 className="text-xl font-bold text-sage-700 mb-4 tracking-tight">
               {t('about.title')}
             </h3>
             {aboutText ? (
-              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line text-[15px]">
                 {aboutText}
               </p>
             ) : (
@@ -276,9 +223,8 @@ export function AboutFooter() {
             )}
           </div>
 
-          {/* Contact column */}
-          <div>
-            <h3 className="text-xl font-bold text-sage-700 mb-4">
+          <div className="footer-animate" style={{ opacity: 0 }}>
+            <h3 className="text-xl font-bold text-sage-700 mb-4 tracking-tight">
               {t('footer.contactHeading')}
             </h3>
             {hasContact ? (
@@ -290,9 +236,7 @@ export function AboutFooter() {
                 )}
                 {phone && (
                   <ContactItem icon={<PhoneIcon />} href={`tel:${phone}`}>
-                    <span className="text-sm text-gray-600" dir="ltr">
-                      {phone}
-                    </span>
+                    <span className="text-sm text-gray-600" dir="ltr">{phone}</span>
                   </ContactItem>
                 )}
                 {hours && (
@@ -303,17 +247,14 @@ export function AboutFooter() {
               </div>
             ) : (
               <p className="text-gray-400 italic text-sm">
-                {isArabic
-                  ? 'لم تتم إضافة معلومات التواصل بعد'
-                  : 'No contact info yet'}
+                {isArabic ? 'لم تتم إضافة معلومات التواصل بعد' : 'No contact info yet'}
               </p>
             )}
           </div>
         </div>
 
-        {/* Social media row */}
         {hasSocials && (
-          <div className="mt-12 pt-8 border-t border-sage-200">
+          <div className="mt-12 pt-8 border-t border-sage-200/60 footer-animate" style={{ opacity: 0 }}>
             <p className="text-sm font-medium text-sage-600 mb-4 text-center">
               {t('about.social')}
             </p>
@@ -323,7 +264,7 @@ export function AboutFooter() {
                   href={instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-500 hover:bg-sage-500 hover:text-white hover:border-sage-500 transition-all duration-200"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-500 hover:bg-sage-500 hover:text-white hover:border-sage-500 hover:shadow-lg hover:shadow-sage-500/20 hover:-translate-y-0.5 transition-all duration-300"
                   aria-label="Instagram"
                 >
                   <InstagramIcon />
@@ -334,7 +275,7 @@ export function AboutFooter() {
                   href={facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-500 hover:bg-sage-500 hover:text-white hover:border-sage-500 transition-all duration-200"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-500 hover:bg-sage-500 hover:text-white hover:border-sage-500 hover:shadow-lg hover:shadow-sage-500/20 hover:-translate-y-0.5 transition-all duration-300"
                   aria-label="Facebook"
                 >
                   <FacebookIcon />
@@ -345,14 +286,9 @@ export function AboutFooter() {
         )}
       </div>
 
-      {/* Footer bar */}
       <div className="relative border-t border-sage-200/60">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-center gap-3">
-          <img
-            src={logoImg}
-            alt="Aromia"
-            className="h-5 w-auto opacity-80"
-          />
+          <img src={logoImg} alt="Aromia" className="h-5 w-auto opacity-80" />
           <span className="text-xs text-gray-500">
             {t('footer.copyright', { year: CURRENT_YEAR })}
           </span>

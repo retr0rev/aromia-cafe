@@ -26,6 +26,13 @@ type ApiError = { error: string }
 
 const MAX_POPULAR = 4
 
+function handleAuthError(res: Response): void {
+  if (res.status === 401) {
+    localStorage.removeItem('token')
+    window.location.href = '/admin/login'
+  }
+}
+
 async function fetchAllItems(): Promise<Item[]> {
   const res = await fetch('/api/items')
   if (!res.ok) {
@@ -55,6 +62,7 @@ async function savePopular(itemIds: number[]): Promise<{ message: string; item_i
     body: JSON.stringify({ item_ids: itemIds }),
   })
   if (!res.ok) {
+    handleAuthError(res)
     const err: ApiError = await res.json()
     throw new Error(err.error || 'فشل حفظ التغييرات')
   }

@@ -11,7 +11,7 @@ import sageLogoIcon from '@/assets/brand/logos/sage-green/Logo - Aromia-03.png'
 type AuthState = 'loading' | 'authenticated' | 'unauth'
 
 interface AuthResponse {
-  username: string
+  admin: { id: number; username: string }
 }
 
 const NAV_ITEMS = [
@@ -52,7 +52,7 @@ function AdminLayout() {
       .then(async (res) => {
         if (!res.ok) throw new Error('unauthorized')
         const data: AuthResponse = await res.json()
-        setUsername(data.username || 'مدير النظام')
+        setUsername(data.admin?.username || 'مدير النظام')
         setAuthState('authenticated')
       })
       .catch(() => {

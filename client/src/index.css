@@ -170,3 +170,17 @@
     }
   }
 }
+
+/* ── Utility: hide scrollbar while keeping scroll ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Tabular numbers for prices ── */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
